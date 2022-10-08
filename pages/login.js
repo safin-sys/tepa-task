@@ -1,10 +1,12 @@
+import Link from "next/link";
+import Login from "../src/components/Login";
 import Nav from "../src/components/Nav";
 
-const Home = () => {
+export default function LoginPage() {
     return (
         <div className="container mx-auto">
             <Nav />
+            <Login />
         </div>
     );
-};
-export default Home;
+}

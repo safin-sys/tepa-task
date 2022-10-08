@@ -1,8 +1,10 @@
+import { updateProfile } from "firebase/auth";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { join } from "../utils/auth";
+import { auth } from "../utils/firebase";
 
 const Login = () => {
     const [submitted, setSubmitted] = useState(false);
@@ -13,17 +15,42 @@ const Login = () => {
         formState: { errors },
     } = useForm();
 
-    const router = useRouter()
-    const onSubmit = (data) => {
+    const router = useRouter();
+    const onSubmit = async (data) => {
         setSubmitted(true);
-        join(data.email, data.password)
-        router.push("/")
+        await join(data.email, data.password).then(() => {
+            updateProfile(auth.currentUser, {
+                displayName: data.name,
+            });
+        });
+        router.push("/");
     };
     return (
-        <main className="flex flex-col w-80 mx-auto justify-center h-[calc(100vh-(64px*2))]">
+        <main className="flex flex-col max-w-xs mx-auto justify-center h-[calc(100vh-(64px*2))]">
             <h1 className="font-medium mb-4 text-center">Join</h1>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="flex flex-col gap-1">
+                    <label htmlFor="name">Name</label>
+                    <input
+                        id="name"
+                        type="text"
+                        className={`px-2 py-[2px] border ${
+                            !errors.name
+                                ? "border-gray-300"
+                                : "focus:border-rose-500 border-rose-500"
+                        } w-full rounded-md`}
+                        placeholder="টেপা ইমন"
+                        {...register("name", {
+                            required: "Name is required",
+                        })}
+                    />
+                    {errors.name && (
+                        <p className="text-sm text-rose-500">
+                            {errors.name.message}
+                        </p>
+                    )}
+                </div>
+                <div className="flex flex-col gap-1 mt-2">
                     <label htmlFor="email">Email</label>
                     <input
                         id="email"
@@ -43,7 +70,9 @@ const Login = () => {
                         })}
                     />
                     {errors.email && (
-                        <p className="text-sm text-rose-500">{errors.email.message}</p>
+                        <p className="text-sm text-rose-500">
+                            {errors.email.message}
+                        </p>
                     )}
                 </div>
                 <div className="flex flex-col gap-1 mt-2">
@@ -61,12 +90,15 @@ const Login = () => {
                             required: "Password is required",
                             minLength: {
                                 value: 6,
-                                message: "Password must be at least 6 characters long",
+                                message:
+                                    "Password must be at least 6 characters long",
                             },
                         })}
                     />
                     {errors.password && (
-                        <p className="text-sm text-rose-500">{errors.password.message}</p>
+                        <p className="text-sm text-rose-500">
+                            {errors.password.message}
+                        </p>
                     )}
                 </div>
                 <div className="flex flex-col gap-1 mt-2">
@@ -83,15 +115,22 @@ const Login = () => {
                         {...register("confirm_password", {
                             required: "Confirm password is required",
                             validate: (val) => {
-                                return val === watch("password") ? true : "Passwords must match";
+                                return val === watch("password")
+                                    ? true
+                                    : "Passwords must match";
                             },
                         })}
                     />
                     {errors.confirm_password && (
-                        <p className="text-sm text-rose-500">{errors.confirm_password.message}</p>
+                        <p className="text-sm text-rose-500">
+                            {errors.confirm_password.message}
+                        </p>
                     )}
                 </div>
-                <button disabled={submitted} className="disabled:bg-indigo-300 flex items-center justify-center w-full bg-indigo-500 text-white rounded-md mt-2 py-[2px]">
+                <button
+                    disabled={submitted}
+                    className="disabled:bg-indigo-300 flex items-center justify-center w-full bg-indigo-500 text-white rounded-md mt-2 py-[2px]"
+                >
                     {submitted ? (
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -154,7 +193,7 @@ const Login = () => {
             </form>
             <p className="mt-2 text-slate-500 text-sm">
                 Already have an account?{" "}
-                <Link href="/">
+                <Link href="/login">
                     <a className="text-indigo-500">Login</a>
                 </Link>
             </p>

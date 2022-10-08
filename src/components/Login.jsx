@@ -1,22 +1,35 @@
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { login } from "../utils/auth";
 
 const Login = () => {
-    const [submitted, setSubmitted] = useState(false)
+    const [submitted, setSubmitted] = useState(false);
     const {
         register,
         handleSubmit,
         formState: { errors },
+        setError,
     } = useForm();
 
+    const router = useRouter();
     const onSubmit = (data) => {
-        setSubmitted(true)
+        setSubmitted(true);
         login(data.email, data.password)
+            .then(() => {
+                router.push("/");
+            })
+            .catch((err) => {
+                setError("password", {
+                    type: "custom",
+                    message: err.message.replace("Firebase: ", ""),
+                });
+                setSubmitted(false);
+            });
     };
     return (
-        <main className="flex flex-col w-80 mx-auto justify-center h-[calc(100vh-(64px*2))]">
+        <main className="flex flex-col max-w-xs mx-auto justify-center h-[calc(100vh-(64px*2))]">
             <h1 className="font-medium mb-4 text-center">Login</h1>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="flex flex-col gap-1">
@@ -28,7 +41,7 @@ const Login = () => {
                             !errors.email
                                 ? "border-gray-300"
                                 : "focus:border-rose-500 border-rose-500"
-                        } w-full rounded-md`}
+                        } rounded-md`}
                         placeholder="emon@example.com"
                         {...register("email", {
                             required: "Email is required",
@@ -39,7 +52,9 @@ const Login = () => {
                         })}
                     />
                     {errors.email && (
-                        <p className="text-sm text-rose-500">{errors.email.message}</p>
+                        <p className="text-sm text-rose-500">
+                            {errors.email.message}
+                        </p>
                     )}
                 </div>
                 <div className="flex flex-col gap-1 mt-2">
@@ -51,17 +66,22 @@ const Login = () => {
                             !errors.password
                                 ? "border-gray-300"
                                 : "focus:border-rose-500 border-rose-500"
-                        } w-full rounded-md`}
+                        } rounded-md`}
                         placeholder="******"
                         {...register("password", {
                             required: "Password is required",
                         })}
                     />
                     {errors.password && (
-                        <p className="text-sm text-rose-500">{errors.password.message}</p>
+                        <p className="text-sm text-rose-500">
+                            {errors.password.message}
+                        </p>
                     )}
                 </div>
-                <button disabled={submitted} className="disabled:bg-indigo-300 flex items-center justify-center w-full bg-indigo-500 text-white rounded-md mt-2 py-[2px]">
+                <button
+                    disabled={submitted}
+                    className="disabled:bg-indigo-300 flex items-center justify-center w-full bg-indigo-500 text-white rounded-md mt-2 py-[2px]"
+                >
                     {submitted ? (
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -118,7 +138,7 @@ const Login = () => {
                             </g>
                         </svg>
                     ) : (
-                        "Join"
+                        "Login"
                     )}
                 </button>
             </form>

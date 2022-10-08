@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Login from "../src/components/Login";
+import Join from "../src/components/Join";
 
 export default function Home() {
     return (
@@ -11,7 +11,7 @@ export default function Home() {
                 </Link>
             </div>
 
-            <Login />
+            <Join />
         </div>
     );
 }
